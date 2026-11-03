@@ -22,9 +22,14 @@
   "maxStops": 1,
   "windowStartDays": 14,
   "windowEndDays": 120,
-  "step": 21,
   "maxReturnChecks": 2,
   "maxPerDuration": 2,
   "minDropEuro": 20,
-  "combosPerRun": 1
+  "combosPerRun": 1,
+  "departureWeekdays": [
+    2,
+    3,
+    6
+  ],
+  "datesPerRun": 5
 }

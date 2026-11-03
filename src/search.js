@@ -21,14 +21,17 @@ export function parseParams(q) {
     maxHours: Number(q.maxHours ?? 24),
     maxStops: Number(q.maxStops ?? 1),
     maxReturnChecks: Number(q.maxReturnChecks ?? 10),
+    dates: Array.isArray(q.dates) ? q.dates.map(String) : undefined,
   };
   const errors = [];
   if (!/^[A-Z]{3}$/.test(p.from) || !/^[A-Z]{3}$/.test(p.to)) errors.push('Airport codes must be 3 letters.');
-  if (!isoDate.test(p.start) || !isoDate.test(p.end) || Number.isNaN(Date.parse(p.start)) || Number.isNaN(Date.parse(p.end)))
-    errors.push('Dates must be YYYY-MM-DD.');
+  const validDate = (d) => isoDate.test(d) && !Number.isNaN(Date.parse(d));
+  if (p.dates) {
+    if (!p.dates.length || !p.dates.every(validDate)) errors.push('Dates must be YYYY-MM-DD.');
+  } else if (!validDate(p.start) || !validDate(p.end)) errors.push('Dates must be YYYY-MM-DD.');
   else if (p.end < p.start) errors.push('End date must not be before start date.');
   if (!Number.isInteger(p.tripDays) || p.tripDays < 1 || p.tripDays > 90) errors.push('Trip length must be 1-90 days.');
-  if (!Number.isInteger(p.step) || p.step < 1 || p.step > 30) errors.push('Step must be 1-30 days.');
+  if (!p.dates && (!Number.isInteger(p.step) || p.step < 1 || p.step > 30)) errors.push('Step must be 1-30 days.');
   if (!(p.maxPrice > 0) || !(p.maxHours > 0)) errors.push('Max price and max hours must be positive.');
   if (!Number.isInteger(p.maxStops) || p.maxStops < 0 || p.maxStops > 2) errors.push('maxStops must be 0-2.');
   if (!Number.isInteger(p.maxReturnChecks) || p.maxReturnChecks < 0 || p.maxReturnChecks > 20)
@@ -38,9 +41,27 @@ export function parseParams(q) {
   return { params: p, errors };
 }
 
-export function datesFor({ start, end, step }) {
+export function datesFor({ start, end, step, dates }) {
+  if (dates) return dates;
   const out = [];
   for (let d = start; d <= end; d = addDays(d, step)) out.push(d);
+  return out;
+}
+
+export function weekdayDates(start, end, weekdays) {
+  const out = [];
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    if (weekdays.includes(new Date(`${d}T00:00:00Z`).getUTCDay())) out.push(d);
+  }
+  return out;
+}
+
+// Evenly spaced pick of at most `count` items; `cursor` shifts the pick so repeated runs cover the whole list.
+export function spreadSample(list, count, cursor) {
+  if (list.length <= count) return list;
+  const stride = Math.ceil(list.length / count);
+  const out = [];
+  for (let i = cursor % stride; i < list.length; i += stride) out.push(list[i]);
   return out;
 }
 

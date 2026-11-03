@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseParams, search } from '../src/search.js';
+import { parseParams, search, spreadSample, weekdayDates } from '../src/search.js';
 
 const opt = (price, hours, token = 't') => ({
   price,
@@ -27,4 +27,16 @@ test('filters by price and duration, verifies return leg, sorts by price', async
 test('rejects bad input', () => {
   assert.ok(parseParams({ start: 'nope', end: 'nope' }).errors.length);
   assert.ok(parseParams({ start: '2027-01-01', end: '2027-12-31', step: 1 }).errors.length);
+});
+
+test('weekdayDates keeps only requested weekdays (Tue=2, Sat=6)', () => {
+  assert.deepEqual(weekdayDates('2027-01-11', '2027-01-17', [2, 6]), ['2027-01-12', '2027-01-16']);
+});
+
+test('spreadSample is evenly spaced, bounded, and rotates with the cursor', () => {
+  const list = Array.from({ length: 45 }, (_, i) => i);
+  assert.deepEqual(spreadSample(list, 5, 0), [0, 9, 18, 27, 36]);
+  assert.deepEqual(spreadSample(list, 5, 1), [1, 10, 19, 28, 37]);
+  assert.ok(spreadSample(list, 5, 8).length <= 5);
+  assert.deepEqual(spreadSample([1, 2], 5, 3), [1, 2]);
 });

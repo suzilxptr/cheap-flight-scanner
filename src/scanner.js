@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSerpApiProvider } from './providers/serpapi.js';
 import { demoProvider } from './providers/demo.js';
-import { addDays, parseParams, search } from './search.js';
+import { addDays, parseParams, search, spreadSample, weekdayDates } from './search.js';
 import { pickNewDeals, pruneState, recordSent, topPerDuration } from './deals.js';
 import { sendDeals, sendText, dealEmbed } from './discord.js';
 import { loadState, saveState } from './state.js';
@@ -18,8 +18,8 @@ export function pickCombos(config, dayIndex) {
   const first = dayIndex * n;
   return {
     combos: Array.from({ length: n }, (_, i) => all[(first + i) % all.length]),
-    // Shift sampled departure dates each full rotation so the whole window gets covered over time.
-    offset: Math.floor(first / all.length) % config.step,
+    // Which sampled dates are used shifts each full rotation so the whole window gets covered over time.
+    rotation: Math.floor(first / all.length),
   };
 }
 
@@ -35,7 +35,13 @@ export async function runScan({ dryRun = false, log = console.log } = {}) {
 
   const state = await loadState();
   const today = new Date().toISOString().slice(0, 10);
-  const { combos, offset } = pickCombos(config, Math.floor(Date.now() / 864e5));
+  const { combos, rotation } = pickCombos(config, Math.floor(Date.now() / 864e5));
+  const eligible = weekdayDates(
+    addDays(today, config.windowStartDays),
+    addDays(today, config.windowEndDays),
+    config.departureWeekdays,
+  );
+  const dates = spreadSample(eligible, config.datesPerRun, rotation);
   const route = `${config.from} → ${config.destinations.map((d) => d.name).join(' / ')}`;
 
   const deals = [];
@@ -46,10 +52,8 @@ export async function runScan({ dryRun = false, log = console.log } = {}) {
     const { params, errors } = parseParams({
       from: config.from,
       to: dest.code,
-      start: addDays(today, config.windowStartDays + offset),
-      end: addDays(today, config.windowEndDays),
+      dates,
       tripDays,
-      step: config.step,
       maxPrice: config.maxPrice,
       // Kathmandu results reserve time for the onward hop to Pokhara.
       maxHours: config.maxHours - dest.transferHours,
