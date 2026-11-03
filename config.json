@@ -1,0 +1,30 @@
+{
+  "from": "HEL",
+  "destinations": [
+    {
+      "code": "PHH",
+      "name": "Pokhara",
+      "transferHours": 0
+    },
+    {
+      "code": "KTM",
+      "name": "Kathmandu",
+      "transferHours": 3
+    }
+  ],
+  "durations": [
+    7,
+    15,
+    30
+  ],
+  "maxPrice": 1000,
+  "maxHours": 25,
+  "maxStops": 1,
+  "windowStartDays": 14,
+  "windowEndDays": 120,
+  "step": 21,
+  "maxReturnChecks": 2,
+  "maxPerDuration": 2,
+  "minDropEuro": 20,
+  "combosPerRun": 1
+}

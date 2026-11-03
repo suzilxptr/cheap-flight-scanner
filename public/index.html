@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheap flights HEL → KTM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Helsinki → Kathmandu</h1>
+    <p class="sub">Round-trip scan across a date window. Shows only options under your price and travel-time limits.</p>
+
+    <form id="form">
+      <label>Earliest departure <input type="date" name="start" required></label>
+      <label>Latest departure <input type="date" name="end" required></label>
+      <label>Trip length (days) <input type="number" name="tripDays" value="14" min="1" max="90" required></label>
+      <label>Check every N days <input type="number" name="step" value="2" min="1" max="30" required></label>
+      <label>Max price (€) <input type="number" name="maxPrice" value="1000" min="1" required></label>
+      <label>Max travel time (h) <input type="number" name="maxHours" value="24" min="1" required></label>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="status" role="status"></div>
+    <div id="results"></div>
+  </main>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

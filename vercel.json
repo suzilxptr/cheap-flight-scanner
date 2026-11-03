@@ -1,0 +1,15 @@
+{
+  "framework": null,
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 7 * * *"
+    }
+  ],
+  "functions": {
+    "api/cron.js": {
+      "maxDuration": 60,
+      "includeFiles": "config.json"
+    }
+  }
+}
